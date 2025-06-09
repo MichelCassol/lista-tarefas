@@ -5,11 +5,11 @@ const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config();
 
-const contactRoutes = require('./routes/contactRoutes');
+const todoRoutes = require('./routes/todoRoutes.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongo:27017/lista-telefonica';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongo:27017/todo-list';
 
 // Middlewares
 app.use(cors());
@@ -21,7 +21,7 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
-app.use('/api/contacts', contactRoutes);
+app.use('/api/todos', todoRoutes);
 
 // Home route - Redirecionar para a interface web
 app.get('/', (req, res) => {
@@ -31,9 +31,9 @@ app.get('/', (req, res) => {
 // API Info route
 app.get('/api', (req, res) => {
   res.json({
-    message: 'Lista Telefônica API',
+    message: 'Lista de tarefas API',
     endpoints: {
-      contacts: '/api/contacts'
+      contacts: '/api/todos'
     }
   });
 });

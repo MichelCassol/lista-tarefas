@@ -1,7 +1,7 @@
-const Contact = require('../models/contactModel');
+const Todo = require('../models/todoModel');
 
-// Get all contacts
-exports.getAllContacts = async (req, res) => {
+// Get all todos
+exports.getAllTodos = async (req, res) => {
   try {
     const { search } = req.query;
     let query = {};
@@ -11,12 +11,12 @@ exports.getAllContacts = async (req, res) => {
       query = { $text: { $search: search } };
     }
     
-    const contacts = await Contact.find(query).sort({ name: 1 });
+    const todos = await Todo.find(query).sort({ name: 1 });
     
     res.status(200).json({
       status: 'success',
-      results: contacts.length,
-      data: contacts
+      results: todos.length,
+      data: todos
     });
   } catch (error) {
     res.status(500).json({
@@ -27,9 +27,9 @@ exports.getAllContacts = async (req, res) => {
 };
 
 // Get a single contact
-exports.getContact = async (req, res) => {
+exports.getTodo = async (req, res) => {
   try {
-    const contact = await Contact.findById(req.params.id);
+    const contact = await Todo.findById(req.params.id);
     
     if (!contact) {
       return res.status(404).json({
@@ -62,13 +62,13 @@ exports.getContact = async (req, res) => {
 };
 
 // Create a new contact
-exports.createContact = async (req, res) => {
+exports.createToDoList = async (req, res) => {
   try {
-    const newContact = await Contact.create(req.body);
+    const newTodo = await Todo.create(req.body);
     
     res.status(201).json({
       status: 'success',
-      data: newContact
+      data: newTodo
     });
   } catch (error) {
     res.status(400).json({
@@ -79,9 +79,9 @@ exports.createContact = async (req, res) => {
 };
 
 // Update a contact
-exports.updateContact = async (req, res) => {
+exports.updateTodoList = async (req, res) => {
   try {
-    const contact = await Contact.findByIdAndUpdate(
+    const contact = await Todo.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -110,9 +110,9 @@ exports.updateContact = async (req, res) => {
 };
 
 // Delete a contact
-exports.deleteContact = async (req, res) => {
+exports.deleteTodoList = async (req, res) => {
   try {
-    const contact = await Contact.findByIdAndDelete(req.params.id);
+    const contact = await Todo.findByIdAndDelete(req.params.id);
     
     if (!contact) {
       return res.status(404).json({

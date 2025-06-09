@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Elementos DOM
-  const contactsList = document.getElementById('contactsList');
-  const contactCount = document.getElementById('contactCount');
-  const contactForm = document.getElementById('contactForm');
-  const saveButton = document.getElementById('saveContact');
+  const contactsList = document.getElementById('todoList');
+  const contactCount = document.getElementById('todoCount');
+  const todoForm = document.getElementById('todoForm');
+  const saveButton = document.getElementById('saveTodo');
   const searchInput = document.getElementById('searchInput');
   const searchButton = document.getElementById('searchButton');
   const confirmDeleteButton = document.getElementById('confirmDelete');
@@ -11,20 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const alertText = document.getElementById('alertText');
   
   // Modais Bootstrap
-  const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+  const todoModal = new bootstrap.Modal(document.getElementById('todoModal'));
   const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
   
   // Estado da aplicação
-  let currentContacts = [];
-  let contactToDeleteId = null;
+  let currentTodos = [];
+  let todoToDeleteId = null;
   let editMode = false; // Novo estado para controlar o modo de edição
   
   // ----- Funções CRUD e Auxiliares -----
   
-  // Carregar contatos
-  async function loadContacts(searchTerm = '') {
+  // Carregar tarefas
+  async function loadTodos(searchTerm = '') {
     try {
-      let url = '/api/contacts';
+      let url = '/api/todos';
       if (searchTerm) {
         url += `?search=${encodeURIComponent(searchTerm)}`;
       }
@@ -33,41 +33,39 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Erro ao carregar contatos');
+        throw new Error(data.message || 'Erro ao carregar tarefa');
       }
       
-      currentContacts = data.data;
-      renderContacts(currentContacts);
-      updateContactCount(currentContacts.length);
+      currentTodos = data.data;
+      renderTodos(currentTodos);
+      updateTodoCount(currentTodos.length);
     } catch (error) {
       showAlert(error.message, 'danger');
     }
   }
   
-  // Criar ou atualizar contato
-  async function saveContact() {
+  // Criar ou atualizar tarefa
+  async function saveTodo() {
     try {
-      const contactId = document.getElementById('contactId').value;
-      const isEditing = !!contactId;
-      
-      const contactData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        address: document.getElementById('address').value,
-        notes: document.getElementById('notes').value
+      const todoId = document.getElementById('todoId').value;
+      const isEditing = !!todoId;
+
+      const todoData = {
+        tarefa: document.getElementById('tarefa').value,
+        start_date: document.getElementById('start_date').value,
+        end_date: document.getElementById('end_date').value
       };
       
       // Validar dados obrigatórios
-      if (!contactData.name || !contactData.phone) {
-        throw new Error('Nome e telefone são obrigatórios');
+      if (!todoData.tarefa || !todoData.start_date) {
+        throw new Error('Tarefa e data de início são obrigatórias');
       }
-      
-      let url = '/api/contacts';
+
+      let url = '/api/todos';
       let method = 'POST';
       
       if (isEditing) {
-        url += `/${contactId}`;
+        url += `/${todoId}`;
         method = 'PUT';
       }
       
@@ -82,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || `Erro ao ${isEditing ? 'atualizar' : 'criar'} contato`);
+        throw new Error(data.message || `Erro ao ${isEditing ? 'atualizar' : 'criar'} tarefa`);
       }
       
       // Fechar modal e limpar formulário
@@ -91,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Recarregar contatos e mostrar mensagem de sucesso
       await loadContacts();
-      showAlert(`Contato ${isEditing ? 'atualizado' : 'criado'} com sucesso!`, 'success');
+      showAlert(`Tarefa ${isEditing ? 'atualizado' : 'criado'} com sucesso!`, 'success');
     } catch (error) {
       showAlert(error.message, 'danger');
     }
@@ -106,13 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || 'Erro ao excluir contato');
+        throw new Error(data.message || 'Erro ao excluir tarefa');
       }
       
       // Fechar modal, recarregar contatos e mostrar mensagem de sucesso
       deleteModal.hide();
       await loadContacts();
-      showAlert('Contato excluído com sucesso!', 'success');
+      showAlert('Tarefa excluída com sucesso!', 'success');
     } catch (error) {
       showAlert(error.message, 'danger');
     }
@@ -126,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Erro ao carregar contato');
+        throw new Error(data.message || 'Erro ao carregar tarefa');
       }
       
       // Verificar estrutura da resposta e extrair o contato
@@ -137,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Verificar se os dados do contato foram recebidos corretamente
       if (!contact) {
-        throw new Error('Dados do contato não encontrados na resposta');
+        throw new Error('Dados da tarefa não encontrados na resposta');
       }
       
       // Limpar formulário ANTES de preencher (para evitar resíduos)
@@ -157,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('notes').value = contact.notes || '';
         
         // Definir título do modal para modo de edição
-        document.getElementById('contactModalLabel').textContent = 'Editar Contato';
+        document.getElementById('contactModalLabel').textContent = 'Editar tarefa';
         
         console.log('Formulário preenchido com:', {
           id: document.getElementById('contactId').value,
@@ -168,18 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 100);
       
     } catch (error) {
-      console.error('Erro ao editar contato:', error);
+      console.error('Erro ao editar tarefa:', error);
       showAlert(error.message, 'danger');
       editMode = false; // Resetar modo de edição em caso de erro
     }
   }
   
   // Renderizar a lista de contatos
-  function renderContacts(contacts) {
+  function renderTodos(contacts) {
     if (contacts.length === 0) {
       contactsList.innerHTML = `
         <tr>
-          <td colspan="5" class="text-center py-4">Nenhum contato encontrado</td>
+          <td colspan="5" class="text-center py-4">Nenhum tarefa encontrada</td>
         </tr>
       `;
       return;
@@ -219,9 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Atualizar contador de contatos
-  function updateContactCount(count) {
-    contactCount.textContent = `${count} contato${count !== 1 ? 's' : ''}`;
+  // Atualizar contador de tarefas
+  function updateTodoCount(count) {
+    todoCount.textContent = `${count} tarefa${count !== 1 ? 's' : ''}`;
   }
   
   // Exibir alerta
@@ -247,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('notes').value = '';
     
     // Configurar título do modal para novo contato
-    document.getElementById('contactModalLabel').textContent = 'Novo Contato';
+    document.getElementById('contactModalLabel').textContent = 'Nova tarefa';
   }
   
   // Função global para edição (para ser acessível pelo onclick)
@@ -258,12 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // ----- Event Listeners -----
   
-  // Evento de salvar contato
-  saveButton.addEventListener('click', saveContact);
+  // Evento de salvar tarefa
+  saveButton.addEventListener('click', saveTodo);
   
   // Evento de pesquisa
   searchButton.addEventListener('click', () => {
-    loadContacts(searchInput.value);
+    loadTodos(searchInput.value);
   });
   
   // Pesquisar ao pressionar Enter

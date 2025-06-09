@@ -7,7 +7,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MONGODB_URI=mongodb://mongo:27017/lista-telefonica
+      - MONGODB_URI=mongodb://mongo:27017/todo-list
       - NODE_ENV=development
     volumes:
       - ./:/app

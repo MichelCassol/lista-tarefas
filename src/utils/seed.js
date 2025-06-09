@@ -1,39 +1,26 @@
 const mongoose = require('mongoose');
-const Contact = require('../models/contactModel');
+const Todo = require('../models/todoModel');
 require('dotenv').config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lista-telefonica';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/todo-list';
 
 // Dados iniciais para popular o banco
-const initialContacts = [
+const initialTodos = [
   {
-    name: 'João Silva',
-    phone: '31987654321',
-    email: 'joao@example.com',
-    address: 'Av. Brasil, 100',
-    notes: 'Contato de trabalho'
+    tarefa: 'Teste 1 ',
+    start_date: '2025-06-09',
+    end_date: '',
   },
   {
-    name: 'Maria Oliveira',
-    phone: '31998765432',
-    email: 'maria@example.com',
-    address: 'Rua das Flores, 200',
-    notes: 'Contato de família'
+    tarefa: 'Teste 2 ',
+    start_date: '2025-06-09',
+    end_date: '',
   },
   {
-    name: 'Pedro Santos',
-    phone: '31999887766',
-    email: 'pedro@example.com',
-    address: 'Praça Central, 50',
-    notes: 'Contato de emergência'
+    tarefa: 'Teste 3 ',
+    start_date: '2025-06-09',
+    end_date: '',
   },
-  {
-    name: 'Ana Pereira',
-    phone: '31999998888',
-    email: 'ana@example.com',
-    address: 'Rua dos Pinheiros, 300',
-    notes: 'Contato pessoal'
-  }
 ];
 
 // Função para popular o banco de dados
@@ -44,16 +31,16 @@ async function seedDatabase() {
     console.log('Conectado ao MongoDB');
 
     // Limpar o banco de dados
-    await Contact.deleteMany({});
+    await Todo.deleteMany({});
     console.log('Dados anteriores removidos');
 
     // Inserir os dados iniciais
-    const contacts = await Contact.create(initialContacts);
-    console.log(`${contacts.length} contatos foram criados no banco de dados`);
+    const todos = await Todo.create(initialTodos);
+    console.log(`${todos.length} tarefas foram criadas no banco de dados`);
 
     // Listar os contatos criados
-    contacts.forEach(contact => {
-      console.log(`- ${contact.name}: ${contact.phone}`);
+    todos.forEach(todo => {
+      console.log(`- ${todo.name}: ${todo.phone}`);
     });
 
     console.log('Processo de seed concluído com sucesso!');
