@@ -33,7 +33,7 @@ app.get('/api', (req, res) => {
   res.json({
     message: 'Lista de tarefas API',
     endpoints: {
-      contacts: '/api/todos'
+      todos: '/api/todos'
     }
   });
 });

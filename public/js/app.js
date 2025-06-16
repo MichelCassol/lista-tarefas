@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Elementos DOM
-  const contactsList = document.getElementById('todoList');
-  const contactCount = document.getElementById('todoCount');
+  const todoList = document.getElementById('todoList');
+  const todoCount = document.getElementById('todoCount');
   const todoForm = document.getElementById('todoForm');
   const saveButton = document.getElementById('saveTodo');
   const searchInput = document.getElementById('searchInput');
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(contactData)
+        body: JSON.stringify(todoData)
       });
       
       const data = await response.json();
@@ -84,21 +84,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // Fechar modal e limpar formulário
-      contactModal.hide();
-      contactForm.reset();
-      
-      // Recarregar contatos e mostrar mensagem de sucesso
-      await loadContacts();
-      showAlert(`Tarefa ${isEditing ? 'atualizado' : 'criado'} com sucesso!`, 'success');
+      todoModal.hide();
+      todoForm.reset();
+
+      // Recarregar tarefas e mostrar mensagem de sucesso
+      await loadTodos();
+      showAlert(`Tarefa ${isEditing ? 'atualizada' : 'criada'} com sucesso!`, 'success');
     } catch (error) {
       showAlert(error.message, 'danger');
     }
   }
   
-  // Excluir contato
-  async function deleteContact(id) {
+  // Excluir tarefa
+  async function deleteTodo(id) {
     try {
-      const response = await fetch(`/api/contacts/${id}`, {
+      const response = await fetch(`/api/todos/${id}`, {
         method: 'DELETE'
       });
       
@@ -109,18 +109,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Fechar modal, recarregar contatos e mostrar mensagem de sucesso
       deleteModal.hide();
-      await loadContacts();
+      await loadTodos();
       showAlert('Tarefa excluída com sucesso!', 'success');
     } catch (error) {
       showAlert(error.message, 'danger');
     }
   }
   
-  // Carregar um contato específico e abrir o modal de edição
-  async function loadAndEditContact(id) {
+  // Carregar um todo específico e abrir o modal de edição
+  async function loadAndEditTodo(id) {
     try {
       editMode = true; // Ativar modo de edição ANTES de abrir o modal
-      const response = await fetch(`/api/contacts/${id}`);
+      const response = await fetch(`/api/todos/${id}`);
       const data = await response.json();
       
       if (!response.ok) {
@@ -130,38 +130,36 @@ document.addEventListener('DOMContentLoaded', () => {
       // Verificar estrutura da resposta e extrair o contato
       console.log('Resposta da API:', data);
       
-      // A API retorna o contato dentro de data.data
-      const contact = data.data;
-      
-      // Verificar se os dados do contato foram recebidos corretamente
-      if (!contact) {
+      // A API retorna o todo dentro de data.data
+      const todo = data.data;
+
+      // Verificar se os dados do todo foram recebidos corretamente
+      if (!todo) {
         throw new Error('Dados da tarefa não encontrados na resposta');
       }
       
       // Limpar formulário ANTES de preencher (para evitar resíduos)
-      document.getElementById('contactId').value = '';
-      
+      document.getElementById('todoId').value = '';
+
       // Exibir o modal (modal é aberto antes de preencher)
-      contactModal.show();
-      
+      todoModal.show();
+
       // Pequena pausa para garantir que o modal esteja totalmente aberto
       setTimeout(() => {
         // Preencher formulário com os dados
-        document.getElementById('contactId').value = contact._id;
-        document.getElementById('name').value = contact.name || '';
-        document.getElementById('phone').value = contact.phone || '';
-        document.getElementById('email').value = contact.email || '';
-        document.getElementById('address').value = contact.address || '';
-        document.getElementById('notes').value = contact.notes || '';
-        
+        document.getElementById('todoId').value = todo._id;
+        document.getElementById('tarefa').value = todo.tarefa || '';
+        document.getElementById('start_date').value = (new Date(todo.start_date).toLocaleDateString(new Intl.DateTimeFormat('US')));
+        document.getElementById('end_date').value = todo.end_date ? new Date(todo.end_date).toLocaleDateString() : '-';
+
         // Definir título do modal para modo de edição
-        document.getElementById('contactModalLabel').textContent = 'Editar tarefa';
+        document.getElementById('todoModalLabel').textContent = 'Editar tarefa';
         
         console.log('Formulário preenchido com:', {
-          id: document.getElementById('contactId').value,
-          name: document.getElementById('name').value,
-          phone: document.getElementById('phone').value,
-          email: document.getElementById('email').value
+          id: document.getElementById('todoId').value,
+          tarefa: document.getElementById('tarefa').value,
+          start_date: document.getElementById('start_date').value,
+          end_date: document.getElementById('end_date').value
         });
       }, 100);
       
@@ -173,9 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Renderizar a lista de contatos
-  function renderTodos(contacts) {
-    if (contacts.length === 0) {
-      contactsList.innerHTML = `
+  function renderTodos(todos) {
+    if (todos.length === 0) {
+      todoList.innerHTML = `
         <tr>
           <td colspan="5" class="text-center py-4">Nenhum tarefa encontrada</td>
         </tr>
@@ -183,17 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    contactsList.innerHTML = contacts.map(contact => `
+    todoList.innerHTML = todos.map(todo => `
       <tr class="fade-in">
-        <td>${contact.name}</td>
-        <td>${contact.phone}</td>
-        <td>${contact.email || '-'}</td>
-        <td>${contact.address || '-'}</td>
-        <td class="contact-actions">
-          <button class="btn btn-action btn-edit" onclick="editContact('${contact._id}')" aria-label="Editar">
+        <td>${todo.tarefa}</td>
+        <td>${todo.start_date ? new Date(todo.start_date).toLocaleDateString('pt-BR') : '-'}</td>
+        <td>${todo.end_date ? new Date(todo.end_date).toLocaleDateString('pt-BR') : '-'}</td>
+        <td class="todo-actions">
+          <button class="btn btn-action btn-edit" onclick="editTodo('${todo._id}')" aria-label="Editar">
             <i class="bi bi-pencil-fill"></i>
           </button>
-          <button class="btn btn-action btn-delete" data-contact-id="${contact._id}" data-contact-name="${contact.name}" aria-label="Excluir">
+          <button class="btn btn-action btn-delete" data-todo-id="${todo._id}" data-todo-name="${todo.tarefa}" aria-label="Excluir">
             <i class="bi bi-trash-fill"></i>
           </button>
         </td>
@@ -209,9 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Botões de exclusão
     document.querySelectorAll('.btn-delete').forEach(button => {
       button.addEventListener('click', () => {
-        contactToDeleteId = button.getAttribute('data-contact-id');
-        const contactName = button.getAttribute('data-contact-name');
-        document.getElementById('deleteContactName').textContent = contactName;
+        todoToDeleteId = button.getAttribute('data-todo-id');
+        const todoName = button.getAttribute('data-todo-name');
+        document.getElementById('deleteTodoName').textContent = todoName;
         deleteModal.show();
       });
     });
@@ -237,21 +234,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Limpar formulário e configurar para novo contato
   function resetForm() {
     // Limpar todos os campos de entrada
-    document.getElementById('contactId').value = '';
-    document.getElementById('name').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('address').value = '';
-    document.getElementById('notes').value = '';
-    
-    // Configurar título do modal para novo contato
-    document.getElementById('contactModalLabel').textContent = 'Nova tarefa';
+    document.getElementById('todoId').value = '';
+    document.getElementById('tarefa').value = '';
+    document.getElementById('start_date').value = '';
+    document.getElementById('end_date').value = '';
+    // Configurar título do modal para nova tarefa
+    document.getElementById('todoModalLabel').textContent = 'Nova tarefa';
   }
   
   // Função global para edição (para ser acessível pelo onclick)
-  window.editContact = function(id) {
-    console.log('Editando contato com ID:', id);
-    loadAndEditContact(id);
+  window.editTodo = function(id) {
+    console.log('Editando a tarefa com ID:', id);
+    loadAndEditTodo(id);
   };
   
   // ----- Event Listeners -----
@@ -267,25 +261,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pesquisar ao pressionar Enter
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      loadContacts(searchInput.value);
+      loadTodo(searchInput.value);
     }
   });
   
   // Evento para confirmar exclusão
   confirmDeleteButton.addEventListener('click', () => {
-    if (contactToDeleteId) {
-      deleteContact(contactToDeleteId);
+    if (todoToDeleteId) {
+      deleteTodo(todoToDeleteId);
     }
   });
   
   // Evento para quando o modal é fechado
-  document.getElementById('contactModal').addEventListener('hidden.bs.modal', function () {
+  document.getElementById('todoModal').addEventListener('hidden.bs.modal', function () {
     // Resetar modo de edição
     editMode = false;
   });
   
-  // Eventos para modal de contato
-  document.getElementById('contactModal').addEventListener('show.bs.modal', function (event) {
+  // Eventos para modal de tarefa
+  document.getElementById('todoModal').addEventListener('show.bs.modal', function (event) {
     // Não resetar o formulário se estivermos em modo de edição
     if (!editMode) {
       resetForm();
@@ -293,5 +287,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Inicialização
-  loadContacts();
+  loadTodos();
 }); 

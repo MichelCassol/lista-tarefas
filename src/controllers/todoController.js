@@ -26,15 +26,15 @@ exports.getAllTodos = async (req, res) => {
   }
 };
 
-// Get a single contact
+// Get a single todo
 exports.getTodo = async (req, res) => {
   try {
-    const contact = await Todo.findById(req.params.id);
+    const todo = await Todo.findById(req.params.id);
     
-    if (!contact) {
+    if (!todo) {
       return res.status(404).json({
         status: 'error',
-        message: 'Contato não encontrado'
+        message: 'Tarefa não encontrada'
       });
     }
     
@@ -43,14 +43,10 @@ exports.getTodo = async (req, res) => {
     res.status(200).json({
       status: 'success',
       data: {
-        _id: contact._id,
-        name: contact.name,
-        phone: contact.phone,
-        email: contact.email,
-        address: contact.address,
-        notes: contact.notes,
-        createdAt: contact.createdAt,
-        updatedAt: contact.updatedAt
+        _id: todo._id,
+        tarefa: todo.tarefa,
+        start_date: todo.start_date,
+        end_date: todo.end_date,
       }
     });
   } catch (error) {
@@ -61,7 +57,7 @@ exports.getTodo = async (req, res) => {
   }
 };
 
-// Create a new contact
+// Create a new todo
 exports.createToDoList = async (req, res) => {
   try {
     const newTodo = await Todo.create(req.body);
@@ -81,7 +77,7 @@ exports.createToDoList = async (req, res) => {
 // Update a contact
 exports.updateTodoList = async (req, res) => {
   try {
-    const contact = await Todo.findByIdAndUpdate(
+    const todo = await Todo.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -90,16 +86,16 @@ exports.updateTodoList = async (req, res) => {
       }
     );
     
-    if (!contact) {
+    if (!todo) {
       return res.status(404).json({
         status: 'error',
-        message: 'Contato não encontrado'
+        message: 'Tarefa não encontrada'
       });
     }
     
     res.status(200).json({
       status: 'success',
-      data: contact
+      data: todo
     });
   } catch (error) {
     res.status(400).json({
@@ -109,15 +105,15 @@ exports.updateTodoList = async (req, res) => {
   }
 };
 
-// Delete a contact
+// Delete a todo
 exports.deleteTodoList = async (req, res) => {
   try {
-    const contact = await Todo.findByIdAndDelete(req.params.id);
+    const todo = await Todo.findByIdAndDelete(req.params.id);
     
-    if (!contact) {
+    if (!todo) {
       return res.status(404).json({
         status: 'error',
-        message: 'Contato não encontrado'
+        message: 'Tarefa não encontrada'
       });
     }
     
