@@ -127,13 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.message || 'Erro ao carregar tarefa');
       }
       
-      // Verificar estrutura da resposta e extrair o contato
-      console.log('Resposta da API:', data);
-      
-      // A API retorna o todo dentro de data.data
+      // A API retorna o contato dentro de data.data
       const todo = data.data;
-
-      // Verificar se os dados do todo foram recebidos corretamente
+      
+      // Verificar se os dados do contato foram recebidos corretamente
       if (!todo) {
         throw new Error('Dados da tarefa não encontrados na resposta');
       }
@@ -149,22 +146,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Preencher formulário com os dados
         document.getElementById('todoId').value = todo._id;
         document.getElementById('tarefa').value = todo.tarefa || '';
-        document.getElementById('start_date').value = (new Date(todo.start_date).toLocaleDateString(new Intl.DateTimeFormat('US')));
-        document.getElementById('end_date').value = todo.end_date ? new Date(todo.end_date).toLocaleDateString() : '-';
-
+        document.getElementById('start_date').value = todo.start_date ? new Date(todo.start_date).toISOString().split('T')[0] : '';
+        document.getElementById('end_date').value = todo.end_date ? new Date(todo.end_date).toISOString().split('T')[0] : '';
+        
         // Definir título do modal para modo de edição
         document.getElementById('todoModalLabel').textContent = 'Editar tarefa';
         
-        console.log('Formulário preenchido com:', {
-          id: document.getElementById('todoId').value,
-          tarefa: document.getElementById('tarefa').value,
-          start_date: document.getElementById('start_date').value,
-          end_date: document.getElementById('end_date').value
-        });
       }, 100);
       
     } catch (error) {
-      console.error('Erro ao editar tarefa:', error);
       showAlert(error.message, 'danger');
       editMode = false; // Resetar modo de edição em caso de erro
     }
@@ -244,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Função global para edição (para ser acessível pelo onclick)
   window.editTodo = function(id) {
-    console.log('Editando a tarefa com ID:', id);
     loadAndEditTodo(id);
   };
   
